@@ -30,20 +30,19 @@ jobs:
         NUGET_AUTH_TOKEN: ${{ secrets.NUGET_AUTH_TOKEN }}
     - name: Restore dependencies
       run: dotnet restore
-
-    - name: Publish Blazor WebAssembly
-      run: dotnet publish -c Release -o build_output
-
+    - name: Build
+      run: dotnet build --no-restore
+    - name: Set project name
+      run: |
+        PROJECT_NAME=$(grep -oPm1 "(?<=<AssemblyName>)[^<]+" MyProject.csproj)
+        echo "PROJECT_NAME=$PROJECT_NAME" >> $GITHUB_ENV
     - name: Update Base Href in index.html
-      run: sed -i 's|<base href="/"|<base href="/${{ github.event.repository.name }}/"|' build_output/wwwroot/index.html
-
+      run: sed -i 's|<base href="/"|<base href="/${{ github.event.repository.name }}/"|' ${{ env.PROJECT_NAME }}/wwwroot/index.html
     - name: SPA Routing Handling
-      run: cp build_output/wwwroot/index.html build_output/wwwroot/404.html
-
+      run: cp ${{ env.PROJECT_NAME }}/wwwroot/index.html ${{ env.PROJECT_NAME }}/wwwroot/404.html
     - name: Upload Build Artifact to GitHub Pages
       uses: actions/upload-pages-artifact@v1
       with:
-        path: build_output/wwwroot
-
+        path: ${{ env.PROJECT_NAME }}/wwwroot
     - name: Deploy to GitHub Pages
       uses: actions/deploy-pages@v1
