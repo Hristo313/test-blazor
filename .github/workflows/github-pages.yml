@@ -31,8 +31,8 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
 
-    - name: Build
-      run: dotnet build --no-restore
+    - name: Publish Blazor WebAssembly
+      run: dotnet publish -c Release -o build_output
 
     - name: Upload Build Artifact to GitHub Pages
       uses: actions/upload-pages-artifact@v1
