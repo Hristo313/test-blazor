@@ -32,18 +32,18 @@ jobs:
       run: dotnet restore
 
     - name: Publish Blazor WebAssembly
-      run: dotnet publish -c Release -o build_output
+      run: dotnet publish -c Release -o publish
 
     - name: Update Base Href in index.html
-      run: sed -i 's|<base href="/"|<base href="/${{ github.event.repository.name }}/"|' build_output/wwwroot/index.html
+      run: sed -i 's|<base href="/"|<base href="/${{ github.event.repository.name }}/"|' publish/wwwroot/index.html
 
     - name: SPA Routing Handling
-      run: cp build_output/wwwroot/index.html build_output/wwwroot/404.html
+      run: cp publish/wwwroot/index.html publish/wwwroot/404.html
 
     - name: Upload Build Artifact to GitHub Pages
       uses: actions/upload-pages-artifact@v1
       with:
-        path: build_output/wwwroot
+        path: publish/wwwroot
 
     - name: Deploy to GitHub Pages
       uses: actions/deploy-pages@v1
