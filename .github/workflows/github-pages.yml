@@ -34,7 +34,7 @@ jobs:
       run: dotnet build --no-restore
     - name: Set project name
       run: |
-        PROJECT_NAME=$(grep -oPm1 "(?<=<AssemblyName>)[^<]+" MyProject.csproj)
+        PROJECT_NAME=$(jq -r '.applicationName' appbuilder-state.json | sed 's/ //g')
         echo "PROJECT_NAME=$PROJECT_NAME" >> $GITHUB_ENV
     - name: Update Base Href in index.html
       run: sed -i 's|<base href="/"|<base href="/${{ github.event.repository.name }}/"|' ${{ env.PROJECT_NAME }}/wwwroot/index.html
