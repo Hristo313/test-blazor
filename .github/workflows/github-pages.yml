@@ -1,0 +1,49 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch: {}
+
+jobs:
+  build-and-deploy:
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 8.0.x
+    - name: Authenticate
+      run: dotnet nuget add source https://packages.infragistics.com/nuget/licensed/ -n Infragistics -u api -p "${NUGET_AUTH_TOKEN#api:}" --store-password-in-clear-text
+      env:
+        NUGET_AUTH_TOKEN: ${{ secrets.NUGET_AUTH_TOKEN }}
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Publish Blazor WebAssembly
+      run: dotnet publish -c Release -o build_output
+
+    - name: Update Base Href in index.html
+      run: sed -i 's|<base href="/"|<base href="/${{ github.event.repository.name }}/"|' build_output/wwwroot/index.html
+
+    - name: SPA Routing Handling
+      run: cp build_output/wwwroot/index.html build_output/wwwroot/404.html
+
+    - name: Upload Build Artifact to GitHub Pages
+      uses: actions/upload-pages-artifact@v1
+      with:
+        path: build_output/wwwroot
+
+    - name: Deploy to GitHub Pages
+      uses: actions/deploy-pages@v1
