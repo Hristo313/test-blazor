@@ -32,8 +32,14 @@ jobs:
       run: dotnet restore
     - name: Publish Blazor WebAssembly
       run: dotnet publish -c Release -o ./publish
+    - name: Set project name
+      run: echo "PROJECT_NAME=$(jq -r '.applicationName' .appbuilder-state.json | sed 's/ //g')" >> $GITHUB_ENV
     - name: Update Base Href in index.html
       run: sed -i 's|<base href="/"|<base href="/${{ github.event.repository.name }}/"|' publish/wwwroot/index.html
+    - name: Update NavigationManager in Razor files
+      run: |
+        sed -i 's|NavigationManager.NavigateTo(path);|NavigationManager.NavigateTo(path.TrimStart("/"));|' ${{ env.PROJECT_NAME }}/Pages/Home.razor
+        sed -i 's|NavigationManager.NavigateTo(path);|NavigationManager.NavigateTo(path.TrimStart("/"));|' ${{ env.PROJECT_NAME }}/Shared/MainLayout.razor
     - name: SPA Routing Handling
       run: cp publish/wwwroot/index.html publish/wwwroot/404.html
     - name: Upload Build Artifact to GitHub Pages
