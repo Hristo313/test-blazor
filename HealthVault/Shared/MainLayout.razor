@@ -96,6 +96,6 @@
 
     public void Navigate(string path)
     {
-        NavigationManager.NavigateTo(path);
+        NavigationManager.NavigateTo(path.TrimStart('/'));
     }
 }
