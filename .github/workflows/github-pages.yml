@@ -31,7 +31,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Publish Blazor WebAssembly
-      run: dotnet publish -c Release -o ./publish --runtime webassembly /p:BaseHref="/${{ github.event.repository.name }}/"
+      run: dotnet publish -c Release -o ./publish
 
     # - name: Update Base Href in index.html
     #   run: sed -i 's|<base href="/"|<base href="/${{ github.event.repository.name }}/"|' publish/wwwroot/index.html
